@@ -18,15 +18,14 @@ vercel             # follow prompts — deploy as-is, no framework
 ### 3. Add environment variables
 In the Vercel dashboard → your project → Settings → Environment Variables, add:
 
-| Name | Value |
-|------|-------|
-| `UPSTASH_REST_URL` | `https://xxxx.upstash.io` |
-| `UPSTASH_REST_TOKEN` | `AXxxxx...` |
-| `RATE_LIMIT_PER_MINUTE` | `60` (optional; default 60 req/min per IP) |
+| Name | Value | Required |
+|------|-------|----------|
+| `UPSTASH_REST_URL` | `https://xxxx.upstash.io` | ✅ |
+| `UPSTASH_REST_TOKEN` | `AXxxxx...` | ✅ |
+| `ALLOWED_ORIGIN` | `https://your-app.vercel.app` | Optional (defaults to your Vercel URL) |
+| `RATE_LIMIT_PER_MINUTE` | `60` | Optional (default: 60 req/min per IP) |
 
 Then redeploy (or run `vercel --prod` again) — done.
-
-**Production:** On Vercel, CORS auto-restricts to your deployment URL. Override with `ALLOWED_ORIGIN` if using a custom domain.
 
 ## Project structure
 
@@ -46,3 +45,8 @@ strideboard/
 |-----|------|-------|
 | `stride:cards` | List | Card JSON objects, LPUSH so newest-first |
 | `stride:hypes` | Hash | `cardId → hype count`, incremented via HINCRBY |
+| `ratelimit:<ip>` | String | Per-IP request count, TTL 60s |
+
+## Rate limiting
+
+The `/api/redis` proxy enforces a per-IP rate limit using Redis itself. Each IP gets a 60-second rolling window (configurable via `RATE_LIMIT_PER_MINUTE`). Exceeding the limit returns a `429` response. Rate limit checks fail open — if Redis is unavailable, requests are allowed through.

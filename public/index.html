@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stride — Running Community Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --paper: #f5f0e8;
+    --cream: #ede8db;
+    --orange: #f4510a;
+    --orange-pale: #fde8de;
+    --green: #1a6b3c;
+    --green-pale: #d4edd9;
+    --blue: #0a3af4;
+    --red: #e8180d;
+    --track: #c8bfaa;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ============ HEADER ============ */
+  header {
+    padding: 24px 32px 20px;
+    border-bottom: 3px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.2rem;
+    letter-spacing: 0.04em;
+    color: var(--orange);
+    line-height: 1;
+  }
+  .logo span { color: var(--paper); }
+
+  .race-badge {
+    background: var(--orange);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 8px 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 2px solid var(--orange);
+    position: relative;
+  }
+
+  .race-badge .days {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    display: block;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  /* ============ TICKER ============ */
+  .ticker-wrap {
+    background: var(--orange);
+    overflow: hidden;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid var(--ink);
+  }
+  .ticker {
+    display: flex;
+    gap: 0;
+    animation: ticker 28s linear infinite;
+    white-space: nowrap;
+  }
+  .ticker-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    padding: 0 32px;
+    border-right: 2px solid var(--ink);
+  }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ============ LAYOUT ============ */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    min-height: calc(100vh - 120px);
+  }
+
+  .feed-col {
+    border-right: 3px solid var(--ink);
+    padding: 0;
+  }
+
+  .sidebar {
+    background: var(--cream);
+    padding: 0;
+  }
+
+  /* ============ SECTION HEADERS ============ */
+  .section-head {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 10px 20px;
+    border-bottom: 3px solid var(--orange);
+  }
+
+  /* ============ ADD CARD ============ */
+  .add-card {
+    padding: 24px;
+    border-bottom: 3px solid var(--ink);
+    background: var(--orange-pale);
+  }
+
+  .add-card h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.06em;
+    margin-bottom: 16px;
+    color: var(--orange);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  input, select, textarea {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    padding: 10px 14px;
+    width: 100%;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--orange);
+  }
+  textarea { resize: vertical; min-height: 70px; }
+
+  .btn-post {
+    background: var(--orange);
+    color: var(--paper);
+    border: 2px solid var(--ink);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: background 0.12s, transform 0.08s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .btn-post:hover {
+    background: var(--ink);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--orange);
+  }
+  .btn-post:active { transform: translate(1px,1px); box-shadow: none; }
+
+  /* ============ NICKNAME WIDGET ============ */
+  .nickname-wrap {
+    position: relative;
+    display: flex;
+  }
+  .nickname-wrap input {
+    flex: 1;
+    border-right: none;
+    background: var(--cream);
+    color: var(--ink);
+    font-style: italic;
+    cursor: default;
+  }
+  .btn-reroll {
+    background: var(--ink);
+    color: var(--paper);
+    border: 2px solid var(--ink);
+    font-size: 1.1rem;
+    width: 42px;
+    cursor: pointer;
+    transition: background 0.1s, transform 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-reroll:hover { background: var(--orange); border-color: var(--orange); }
+  .btn-reroll:active { transform: rotate(180deg); }
+
+  .anon-row {
+    margin-bottom: 12px;
+  }
+  .anon-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .anon-toggle input[type=checkbox] { display: none; }
+  .anon-box {
+    width: 18px; height: 18px;
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    flex-shrink: 0;
+    position: relative;
+    transition: background 0.1s;
+  }
+  .anon-toggle input:checked + .anon-box {
+    background: var(--ink);
+  }
+  .anon-toggle input:checked + .anon-box::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--paper);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .anon-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: #555;
+  }
+  .anon-toggle:hover .anon-label { color: var(--ink); }
+
+  /* anon badge on cards */
+  .anon-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 2px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+    letter-spacing: 0.06em;
+  }
+
+  /* ============ CARD FEED ============ */
+  .cards-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .runner-card {
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.12s, box-shadow 0.12s;
+    animation: cardIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+  .runner-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .card-accent {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 5px;
+  }
+
+  .card-body {
+    padding: 16px 16px 16px 24px;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .runner-info { flex: 1; }
+
+  .runner-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.06em;
+    line-height: 1;
+  }
+
+  .runner-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: #666;
+    margin-top: 2px;
+  }
+
+  .goal-chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 5px 10px;
+    border: 2px solid currentColor;
+    white-space: nowrap;
+  }
+
+  .card-message {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #333;
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .pace-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 3px 8px;
+  }
+
+  .hype-btn {
+    background: none;
+    border: 2px solid var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.1s, color 0.1s, transform 0.08s;
+  }
+  .hype-btn:hover { background: var(--orange); border-color: var(--orange); color: var(--paper); }
+  .hype-btn.hyped { background: var(--orange); border-color: var(--orange); color: var(--paper); }
+  .hype-btn:active { transform: scale(0.96); }
+
+  .hype-burst {
+    position: absolute;
+    right: 16px; bottom: 40px;
+    font-size: 1.4rem;
+    pointer-events: none;
+    animation: burst 0.6s ease-out forwards;
+  }
+  @keyframes burst {
+    0% { transform: scale(0) translateY(0); opacity: 1; }
+    60% { transform: scale(1.3) translateY(-20px); opacity: 1; }
+    100% { transform: scale(0.8) translateY(-40px); opacity: 0; }
+  }
+
+  /* ============ SIDEBAR ============ */
+  .stats-block {
+    padding: 20px;
+    border-bottom: 3px solid var(--ink);
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--track);
+  }
+  .stat-row:last-child { border: none; }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #666;
+  }
+
+  .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.04em;
+    color: var(--orange);
+  }
+
+  /* ============ PROGRESS TRACK ============ */
+  .track-block {
+    padding: 20px;
+    border-bottom: 3px solid var(--ink);
+  }
+
+  .track-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #666;
+    margin-bottom: 8px;
+  }
+
+  .track-bar {
+    height: 20px;
+    background: var(--cream);
+    border: 2px solid var(--ink);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+
+  .track-fill {
+    height: 100%;
+    background: var(--orange);
+    transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+  }
+
+  .track-fill::after {
+    content: '🏃';
+    position: absolute;
+    right: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+  }
+
+  .track-nums {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: #666;
+  }
+
+  /* ============ LEADERBOARD ============ */
+  .lb-block {
+    padding: 20px;
+    border-bottom: 3px solid var(--ink);
+  }
+
+  .lb-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--track);
+  }
+  .lb-item:last-child { border: none; }
+
+  .lb-rank {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--track);
+    width: 24px;
+    line-height: 1;
+  }
+  .lb-rank.gold { color: #c9960c; }
+  .lb-rank.silver { color: #888; }
+  .lb-rank.bronze { color: #a0622a; }
+
+  .lb-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    flex: 1;
+  }
+
+  .lb-hypes {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--orange);
+    font-weight: 500;
+  }
+
+  /* ============ RACE INFO ============ */
+  .race-block {
+    padding: 20px;
+  }
+
+  .race-detail {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--track);
+    display: flex;
+    gap: 10px;
+  }
+  .race-detail:last-child { border: none; }
+  .race-detail .rd-key { color: #666; min-width: 80px; }
+  .race-detail .rd-val { font-weight: 500; }
+
+  /* ============ FILTERS ============ */
+  .filters {
+    display: flex;
+    gap: 8px;
+    padding: 16px 20px;
+    border-bottom: 3px solid var(--ink);
+    flex-wrap: wrap;
+    background: var(--cream);
+  }
+
+  .filter-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border: 2px solid var(--ink);
+    background: none;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+  }
+  .filter-btn.active { background: var(--ink); color: var(--paper); }
+  .filter-btn:hover:not(.active) { background: var(--orange-pale); }
+
+  /* ============ EMPTY STATE ============ */
+  .empty-state {
+    padding: 48px 24px;
+    text-align: center;
+  }
+  .empty-state .es-icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state p {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: #888;
+  }
+
+  /* ============ COLORS BY TYPE ============ */
+  [data-type="personal-best"] .card-accent { background: var(--orange); }
+  [data-type="first-race"] .card-accent { background: var(--blue); }
+  [data-type="sub-60"] .card-accent { background: var(--green); }
+  [data-type="just-finish"] .card-accent { background: #b026ff; }
+  [data-type="injury-return"] .card-accent { background: var(--red); }
+
+  [data-type="personal-best"] .goal-chip { color: var(--orange); }
+  [data-type="first-race"] .goal-chip { color: var(--blue); }
+  [data-type="sub-60"] .goal-chip { color: var(--green); }
+  [data-type="just-finish"] .goal-chip { color: #b026ff; }
+  [data-type="injury-return"] .goal-chip { color: var(--red); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s;
+  }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+  .modal {
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    max-width: 420px;
+    width: 90%;
+    padding: 32px;
+    box-shadow: 8px 8px 0 var(--orange);
+    animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes modalIn {
+    from { transform: scale(0.8) translateY(40px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .modal h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.06em;
+    color: var(--orange);
+    margin-bottom: 8px;
+  }
+  .modal p {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  .modal-close {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .modal-close:hover { background: var(--orange); }
+
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; }
+    .sidebar { border-top: 3px solid var(--ink); }
+    .form-row { grid-template-columns: 1fr; }
+    .logo { font-size: 2.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">Stride<span>Board</span></div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.72rem;color:#888;letter-spacing:0.08em;margin-top:4px">TCS WORLD 10K BENGALURU — COMMUNITY HYPE WALL</div>
+  </div>
+  <div class="race-badge">
+    <span class="days" id="countdown">56</span>
+    DAYS TO RACE DAY<br>
+    <span style="color:var(--ink);opacity:0.7">APR 26, 2026</span>
+  </div>
+</header>
+
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker">
+    <span class="ticker-item">🏃 TCS World 10K Bengaluru — Apr 26, 2026</span>
+    <span class="ticker-item">📍 Kanteerava Stadium to MG Road</span>
+    <span class="ticker-item">💪 Post your goal — hype your crew</span>
+    <span class="ticker-item">🎯 Fastest 10K route in India</span>
+    <span class="ticker-item">🌅 Race morning: 6:30 AM flag-off</span>
+    <span class="ticker-item">🏃 TCS World 10K Bengaluru — Apr 26, 2026</span>
+    <span class="ticker-item">📍 Kanteerava Stadium to MG Road</span>
+    <span class="ticker-item">💪 Post your goal — hype your crew</span>
+    <span class="ticker-item">🎯 Fastest 10K route in India</span>
+    <span class="ticker-item">🌅 Race morning: 6:30 AM flag-off</span>
+  </div>
+</div>
+
+<div class="main">
+  <!-- FEED COLUMN -->
+  <div class="feed-col">
+    <!-- ADD CARD -->
+    <div class="add-card">
+      <h2>Drop Your Race Goal 🎯</h2>
+      <div class="form-row">
+        <div class="nickname-wrap">
+          <input type="text" id="inp-name" placeholder="Nickname" maxlength="32" readonly>
+          <button class="btn-reroll" onclick="rerollNickname()" title="Generate new nickname">↺</button>
+        </div>
+        <input type="text" id="inp-goal" placeholder="Goal time e.g. 65:00" maxlength="16">
+      </div>
+      <div class="anon-row">
+        <label class="anon-toggle">
+          <input type="checkbox" id="inp-anon" onchange="toggleAnon()">
+          <span class="anon-box"></span>
+          <span class="anon-label">Post anonymously — hide my nickname</span>
+        </label>
+      </div>
+      <div class="form-row">
+        <select id="inp-type">
+          <option value="personal-best">🔥 Personal Best</option>
+          <option value="sub-60">⚡ Sub-60 Attempt</option>
+          <option value="first-race">🌟 First Ever Race</option>
+          <option value="just-finish">💚 Just Finish Strong</option>
+          <option value="injury-return">❤️ Injury Comeback</option>
+        </select>
+        <input type="text" id="inp-pace" placeholder="Target pace e.g. 6:30/km" maxlength="16">
+      </div>
+      <textarea id="inp-msg" placeholder="What's driving you to this goal? Tell the crew..."></textarea>
+      <div style="margin-top:12px">
+        <button class="btn-post" id="post-btn" onclick="addCard()">
+          <span>POST TO BOARD</span>
+          <span style="font-size:1.1rem">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters">
+      <button class="filter-btn active" onclick="setFilter('all', this)">All Goals</button>
+      <button class="filter-btn" onclick="setFilter('personal-best', this)">🔥 PB</button>
+      <button class="filter-btn" onclick="setFilter('sub-60', this)">⚡ Sub-60</button>
+      <button class="filter-btn" onclick="setFilter('first-race', this)">🌟 First Race</button>
+      <button class="filter-btn" onclick="setFilter('just-finish', this)">💚 Finish</button>
+      <button class="filter-btn" onclick="setFilter('injury-return', this)">❤️ Comeback</button>
+    </div>
+
+    <div class="cards-container" id="cards-container">
+      <!-- cards rendered here -->
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="section-head">COMMUNITY STATS</div>
+    <div class="stats-block">
+      <div class="stat-row">
+        <span class="stat-label">Runners In</span>
+        <span class="stat-val" id="stat-runners">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Total Hypes</span>
+        <span class="stat-val" id="stat-hypes">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Sub-60 Goals</span>
+        <span class="stat-val" id="stat-sub60">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">First Timers</span>
+        <span class="stat-val" id="stat-first">0</span>
+      </div>
+    </div>
+
+    <div class="section-head">COUNTDOWN</div>
+    <div class="track-block">
+      <div class="track-label">Training Progress to Race Day</div>
+      <div class="track-bar">
+        <div class="track-fill" id="training-fill" style="width:0%"></div>
+      </div>
+      <div class="track-nums">
+        <span>Training Start</span>
+        <span id="prog-pct">0%</span>
+        <span>Apr 26</span>
+      </div>
+    </div>
+
+    <div class="section-head">TOP HYPED 🔥</div>
+    <div class="lb-block" id="leaderboard">
+      <div style="font-family:'DM Mono',monospace;font-size:0.75rem;color:#999;padding:8px 0">Be the first to post and get hyped!</div>
+    </div>
+
+    <div class="section-head">RACE INFO</div>
+    <div class="race-block">
+      <div class="race-detail"><span class="rd-key">RACE</span><span class="rd-val">TCS World 10K Bengaluru</span></div>
+      <div class="race-detail"><span class="rd-key">DATE</span><span class="rd-val">Sunday, Apr 26, 2026</span></div>
+      <div class="race-detail"><span class="rd-key">FLAG OFF</span><span class="rd-val">6:30 AM IST</span></div>
+      <div class="race-detail"><span class="rd-key">DISTANCE</span><span class="rd-val">10 Kilometers</span></div>
+      <div class="race-detail"><span class="rd-key">ROUTE</span><span class="rd-val">Kanteerava → Cubbon → MG Road</span></div>
+      <div class="race-detail"><span class="rd-key">PACE ZONE</span><span class="rd-val">Fast / Certified Course</span></div>
+    </div>
+  </aside>
+</div>
+
+<!-- HYPE MODAL -->
+<div class="modal-overlay" id="modal" style="display:none" onclick="closeModal(event)">
+  <div class="modal">
+    <h3>🔥 HYPED UP!</h3>
+    <p id="modal-text">You just hyped a fellow runner. The energy is contagious. See you at the start line.</p>
+    <button class="modal-close" onclick="document.getElementById('modal').style.display='none'">CLOSE ×</button>
+  </div>
+</div>
+
+<script>
+// ---- NICKNAME GENERATOR ----
+const ADJECTIVES = [
+  'Swift','Blazing','Iron','Silent','Steady','Wild','Fearless','Relentless',
+  'Nimble','Soaring','Gritty','Fierce','Calm','Lone','Bold','Rapid',
+  'Tireless','Electric','Midnight','Golden'
+];
+const ANIMALS = [
+  'Gazelle','Cheetah','Falcon','Panther','Wolf','Stallion','Puma','Mamba',
+  'Hawk','Rhino','Jaguar','Bison','Crane','Fox','Orca','Lynx',
+  'Condor','Viper','Elk','Kite'
+];
+
+function generateNickname() {
+  const adj  = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+  const ani  = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+  const num  = Math.floor(Math.random() * 90) + 10; // 10-99
+  return `${adj}${ani}${num}`;
+}
+
+function rerollNickname() {
+  const inp = document.getElementById('inp-name');
+  inp.value = generateNickname();
+  inp.style.animation = 'none';
+  requestAnimationFrame(() => { inp.style.animation = 'fadeFlash 0.3s ease'; });
+}
+
+function toggleAnon() {
+  const isAnon = document.getElementById('inp-anon').checked;
+  const inp = document.getElementById('inp-name');
+  inp.style.opacity = isAnon ? '0.4' : '1';
+}
+
+// Redis keys
+const KEY_CARDS  = 'stride:cards';   // List  — card JSON objects (LPUSH / LRANGE)
+const KEY_HYPES  = 'stride:hypes';   // Hash  — cardId -> hype count (HINCRBY / HGETALL)
+
+// ---- REDIS PROXY HELPER ----
+// All Redis commands go through /api/redis — the Upstash token stays server-side.
+async function redis(command, ...args) {
+  const res = await fetch('/api/redis', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ command: [command, ...args] })
+  });
+  if (!res.ok) throw new Error(`Proxy error ${res.status}`);
+  const json = await res.json();
+  if (json.error) throw new Error(json.error);
+  return json.result;
+}
+
+// Fetch all cards + their hype counts from Redis
+async function fetchCards() {
+  // LRANGE returns newest-first because we LPUSH
+  const raw = await redis('lrange', KEY_CARDS, 0, 99);
+  if (!raw || raw.length === 0) return [];
+
+  const hypesRaw = await redis('hgetall', KEY_HYPES);
+  // hgetall returns [k,v,k,v,...] or null
+  const hypesMap = {};
+  if (hypesRaw) {
+    for (let i = 0; i < hypesRaw.length; i += 2) {
+      hypesMap[hypesRaw[i]] = parseInt(hypesRaw[i+1], 10) || 0;
+    }
+  }
+
+  return raw.map(s => {
+    const c = JSON.parse(s);
+    c.hypes = hypesMap[c.id] || 0;
+    // Per-session hyped state from sessionStorage (not persisted globally — intentional)
+    c.hyped = sessionStorage.getItem('hyped:' + c.id) === '1';
+    return c;
+  });
+}
+
+async function pushCard(card) {
+  // Store card JSON in list (no hype count inside the JSON — hypes live in the hash)
+  const { hypes, hyped, ...cardData } = card;
+  await redis('lpush', KEY_CARDS, JSON.stringify(cardData));
+}
+
+async function incrementHype(id, delta) {
+  // delta: +1 or -1
+  await redis('hincrby', KEY_HYPES, id, delta);
+}
+
+// ---- STATE ----
+let cards = [];
+let currentFilter = 'all';
+let isLoading = false;
+
+// ---- COUNTDOWN ----
+function updateCountdown() {
+  const race = new Date('2026-04-26T06:30:00+05:30');
+  const now = new Date();
+  const diff = Math.ceil((race - now) / (1000*60*60*24));
+  document.getElementById('countdown').textContent = Math.max(0, diff);
+
+  const trainStart = new Date(race);
+  trainStart.setDate(trainStart.getDate() - 112); // 16-week plan
+  const total = race - trainStart;
+  const elapsed = now - trainStart;
+  const pct = Math.min(100, Math.max(0, Math.round(elapsed / total * 100)));
+  document.getElementById('training-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+}
+
+// ---- RENDER ----
+const TYPE_LABELS = {
+  'personal-best': '🔥 Personal Best',
+  'sub-60':        '⚡ Sub-60 Goal',
+  'first-race':    '🌟 First Race',
+  'just-finish':   '💚 Just Finish',
+  'injury-return': '❤️ Comeback'
+};
+
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function setLoading(on) {
+  isLoading = on;
+  const btn = document.getElementById('post-btn');
+  btn.disabled = on;
+  btn.innerHTML = on
+    ? '<span style="opacity:0.6">POSTING...</span>'
+    : '<span>POST TO BOARD</span><span style="font-size:1.1rem">→</span>';
+}
+
+function renderCards() {
+  const container = document.getElementById('cards-container');
+  const filtered = currentFilter === 'all' ? cards : cards.filter(c => c.type === currentFilter);
+
+  if (filtered.length === 0 && !isLoading) {
+    const msg = currentFilter === 'all'
+      ? `<div class="empty-state">
+           <div class="es-icon">🏁</div>
+           <p style="font-size:0.95rem;font-weight:500;color:var(--ink);margin-bottom:6px">No goals posted yet.</p>
+           <p>Be the first from your crew to drop your race goal above.<br>The board is waiting for you.</p>
+         </div>`
+      : `<div class="empty-state"><div class="es-icon">🔍</div><p>No runners in this category yet.</p></div>`;
+    container.innerHTML = msg;
+    return;
+  }
+
+  container.innerHTML = filtered.map(c => `
+    <div class="runner-card" data-type="${c.type}" id="card-${c.id}">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <div class="runner-info">
+            <div class="runner-name">
+              ${c.anon ? '🕶️ Anonymous Runner' : escapeHtml(c.name)}
+              ${c.anon ? '<span class="anon-badge">ANON</span>' : ''}
+            </div>
+            <div class="runner-meta">Goal: ${escapeHtml(c.goal)} · ${timeAgo(c.ts)}</div>
+          </div>
+          <div class="goal-chip">${TYPE_LABELS[c.type] || c.type}</div>
+        </div>
+        ${c.message ? `<div class="card-message">"${escapeHtml(c.message)}"</div>` : ''}
+        <div class="card-footer">
+          <div class="pace-tag">${c.pace ? escapeHtml(c.pace) : 'No pace set'}</div>
+          <button class="hype-btn ${c.hyped ? 'hyped' : ''}" onclick="hype('${c.id}')">
+            🔥 ${c.hypes}
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderStats() {
+  document.getElementById('stat-runners').textContent = cards.length;
+  document.getElementById('stat-hypes').textContent = cards.reduce((a,c) => a + c.hypes, 0);
+  document.getElementById('stat-sub60').textContent = cards.filter(c => c.type === 'sub-60').length;
+  document.getElementById('stat-first').textContent = cards.filter(c => c.type === 'first-race').length;
+}
+
+function renderLeaderboard() {
+  const sorted = [...cards].sort((a,b) => b.hypes - a.hypes).slice(0,5).filter(c => c.hypes > 0);
+  const rankClass = ['gold','silver','bronze','',''];
+  document.getElementById('leaderboard').innerHTML = sorted.length === 0
+    ? `<div style="font-family:'DM Mono',monospace;font-size:0.75rem;color:#999;padding:8px 0">Hype a runner to start the board!</div>`
+    : sorted.map((c,i) => `
+      <div class="lb-item">
+        <span class="lb-rank ${rankClass[i]}">${i+1}</span>
+        <span class="lb-name">${escapeHtml(c.name)}</span>
+        <span class="lb-hypes">🔥 ${c.hypes}</span>
+      </div>
+    `).join('');
+}
+
+function renderError(msg) {
+  document.getElementById('cards-container').innerHTML = `
+    <div class="empty-state">
+      <div class="es-icon">⚠️</div>
+      <p style="color:var(--red)">${msg}</p>
+    </div>`;
+}
+
+function render() {
+  renderCards();
+  renderStats();
+  renderLeaderboard();
+}
+
+// ---- ACTIONS ----
+function shake(id) {
+  const el = document.getElementById(id);
+  el.style.animation = 'shake 0.3s ease';
+  el.addEventListener('animationend', () => el.style.animation = '', {once:true});
+}
+
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} } @keyframes fadeFlash { 0%{opacity:0;transform:translateY(-4px)} 100%{opacity:1;transform:translateY(0)} }`;
+document.head.appendChild(shakeStyle);
+
+async function addCard() {
+  if (isLoading) return;
+  const name = document.getElementById('inp-name').value.trim();
+  const goal = document.getElementById('inp-goal').value.trim();
+  const type = document.getElementById('inp-type').value;
+  const pace = document.getElementById('inp-pace').value.trim();
+  const msg  = document.getElementById('inp-msg').value.trim();
+
+  if (!name) { document.getElementById('inp-name').focus(); shake('inp-name'); return; }
+  if (!goal) { document.getElementById('inp-goal').focus(); shake('inp-goal'); return; }
+
+  const isAnon = document.getElementById('inp-anon').checked;
+  const displayName = isAnon ? 'Anonymous Runner' : name;
+  const card = { id: 'c' + Date.now(), name: displayName, anon: isAnon, goal, type, pace, message: msg, ts: Date.now() };
+
+  setLoading(true);
+  try {
+    await pushCard(card);
+    // Optimistic prepend
+    card.hypes = 0;
+    card.hyped = false;
+    cards.unshift(card);
+    ['inp-name','inp-goal','inp-pace','inp-msg'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('inp-type').selectedIndex = 0;
+    render();
+  } catch(e) {
+    renderError('Could not save to Redis. Check your Upstash credentials.');
+    console.error(e);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function hype(id) {
+  const card = cards.find(c => c.id === id);
+  if (!card) return;
+
+  const wasHyped = card.hyped;
+  const delta = wasHyped ? -1 : 1;
+
+  // Optimistic update
+  card.hyped = !wasHyped;
+  card.hypes += delta;
+  sessionStorage.setItem('hyped:' + id, card.hyped ? '1' : '0');
+  render();
+
+  // Burst animation
+  const cardEl = document.getElementById('card-' + id);
+  if (cardEl && !wasHyped) {
+    const burst = document.createElement('div');
+    burst.className = 'hype-burst';
+    burst.textContent = '🔥';
+    cardEl.appendChild(burst);
+    burst.addEventListener('animationend', () => burst.remove());
+
+    const modal = document.getElementById('modal');
+    document.getElementById('modal-text').textContent =
+      `You hyped ${card.name}'s goal of ${card.goal}. The energy is contagious — see you at the start line! 🏃`;
+    modal.style.display = 'flex';
+    setTimeout(() => modal.style.display = 'none', 3000);
+  }
+
+  try {
+    await incrementHype(id, delta);
+  } catch(e) {
+    // Roll back on failure
+    card.hyped = wasHyped;
+    card.hypes -= delta;
+    sessionStorage.setItem('hyped:' + id, card.hyped ? '1' : '0');
+    render();
+    console.error('Hype sync failed:', e);
+  }
+}
+
+function closeModal(e) {
+  if (e.target.id === 'modal') document.getElementById('modal').style.display = 'none';
+}
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards();
+}
+
+// ---- INIT ----
+async function init() {
+  // Generate initial nickname
+  document.getElementById('inp-name').value = generateNickname();
+
+  updateCountdown();
+  setInterval(updateCountdown, 60000);
+
+  document.getElementById('cards-container').innerHTML =
+    `<div class="empty-state"><div class="es-icon" style="animation:spin 1s linear infinite;display:inline-block">⏳</div><p>Loading the board...</p></div>`;
+
+  const spinStyle = document.createElement('style');
+  spinStyle.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
+  document.head.appendChild(spinStyle);
+
+  try {
+    cards = await fetchCards();
+    render();
+  } catch(e) {
+    renderError('Could not connect to Redis. Check your Upstash environment variables in Vercel.');
+    console.error(e);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # StrideBoard 🏃
 
-Community race goal board for TCS World 10K Bengaluru runners.
+A community hype wall where runners everywhere can post their race goals and get hyped up by the crowd. 🔥
 
 ## Deploy to Vercel
 

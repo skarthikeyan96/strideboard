@@ -22,8 +22,11 @@ In the Vercel dashboard → your project → Settings → Environment Variables,
 |------|-------|
 | `UPSTASH_REST_URL` | `https://xxxx.upstash.io` |
 | `UPSTASH_REST_TOKEN` | `AXxxxx...` |
+| `RATE_LIMIT_PER_MINUTE` | `60` (optional; default 60 req/min per IP) |
 
 Then redeploy (or run `vercel --prod` again) — done.
+
+**Production:** On Vercel, CORS auto-restricts to your deployment URL. Override with `ALLOWED_ORIGIN` if using a custom domain.
 
 ## Project structure
 

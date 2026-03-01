@@ -912,6 +912,9 @@ function timeAgo(ts) {
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+function escapeJsString(s) {
+  return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r/g, '').replace(/\n/g, '');
+}
 
 function setLoading(on) {
   isLoading = on;
@@ -939,7 +942,7 @@ function renderCards() {
   }
 
   container.innerHTML = filtered.map(c => `
-    <div class="runner-card" data-type="${c.type}" id="card-${c.id}">
+    <div class="runner-card" data-type="${escapeHtml(c.type)}" id="card-${escapeHtml(c.id)}">
       <div class="card-accent"></div>
       <div class="card-body">
         <div class="card-top">
@@ -950,12 +953,12 @@ function renderCards() {
             </div>
             <div class="runner-meta">Goal: ${escapeHtml(c.goal)} · ${timeAgo(c.ts)}</div>
           </div>
-          <div class="goal-chip">${TYPE_LABELS[c.type] || c.type}</div>
+          <div class="goal-chip">${TYPE_LABELS[c.type] || escapeHtml(c.type)}</div>
         </div>
         ${c.message ? `<div class="card-message">"${escapeHtml(c.message)}"</div>` : ''}
         <div class="card-footer">
           <div class="pace-tag">${c.pace ? escapeHtml(c.pace) : 'No pace set'}</div>
-          <button class="hype-btn ${c.hyped ? 'hyped' : ''}" onclick="hype('${c.id}')">
+          <button class="hype-btn ${c.hyped ? 'hyped' : ''}" onclick="hype('${escapeJsString(c.id)}')">
             🔥 ${c.hypes}
           </button>
         </div>

@@ -43,23 +43,33 @@ async function isContentSafe(text) {
   if (!apiKey || !text || !text.trim()) return true;
 
   try {
-    const res = await fetch('https://api.openai.com/v1/moderations', {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({ input: text.trim() }),
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a content moderator for a family-friendly running community board. Consider profanity, slurs, hate, harassment, spam, and off-topic content. Reply with exactly one word: YES if the content is appropriate to post, NO if it is not.',
+          },
+          { role: 'user', content: text.trim() },
+        ],
+        max_tokens: 10,
+      }),
     });
     if (!res.ok) {
-      console.error('OpenAI Moderation API error:', res.status, await res.text());
+      console.error('OpenAI moderation check error:', res.status, await res.text());
       return true; // fail open
     }
     const data = await res.json();
-    const flagged = data.results?.[0]?.flagged ?? false;
-    return !flagged;
+    const reply = (data.choices?.[0]?.message?.content ?? '').trim().toUpperCase();
+    return reply.startsWith('YES');
   } catch (err) {
-    console.error('OpenAI Moderation request failed:', err);
+    console.error('OpenAI moderation check failed:', err);
     return true; // fail open
   }
 }

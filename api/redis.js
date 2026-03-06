@@ -72,8 +72,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'command must be a non-empty array' });
   }
 
-  // Block write commands except the ones we actually use
-  const ALLOWED = new Set(['lrange', 'lpush', 'hgetall', 'hincrby']);
+  // Read-only + hype; new posts go through /api/post (moderation)
+  const ALLOWED = new Set(['lrange', 'hgetall', 'hincrby']);
   const cmd = String(command[0]).toLowerCase();
   if (!ALLOWED.has(cmd)) {
     return res.status(403).json({ error: `Command "${cmd}" not allowed` });

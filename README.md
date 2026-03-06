@@ -15,13 +15,19 @@ npm i -g vercel    # if you don't have it
 vercel             # follow prompts — deploy as-is, no framework
 ```
 
-### 3. Add environment variables
+### 3. Get OpenAI API key (content moderation)
+1. Go to [platform.openai.com](https://platform.openai.com) and sign in
+2. API keys → Create new secret key
+3. The app uses the **Moderation API** only (no ChatGPT usage)
+
+### 4. Add environment variables
 In the Vercel dashboard → your project → Settings → Environment Variables, add:
 
 | Name | Value | Required |
 |------|-------|----------|
 | `UPSTASH_REST_URL` | `https://xxxx.upstash.io` | ✅ |
 | `UPSTASH_REST_TOKEN` | `AXxxxx...` | ✅ |
+| `OPENAI_API_KEY` | Your OpenAI API key (for moderation) | ✅ |
 | `ALLOWED_ORIGIN` | `https://your-app.vercel.app` | Optional (defaults to your Vercel URL) |
 | `RATE_LIMIT_PER_MINUTE` | `60` | Optional (default: 60 req/min per IP) |
 
@@ -34,7 +40,8 @@ strideboard/
 ├── public/
 │   └── index.html      # The full app — pure HTML/CSS/JS
 ├── api/
-│   └── redis.js        # Vercel serverless proxy — keeps token server-side
+│   ├── redis.js        # Vercel serverless proxy — reads + hype (no lpush)
+│   └── post.js         # New posts: OpenAI moderation, then LPUSH
 ├── vercel.json         # Tells Vercel to serve from /public
 └── package.json
 ```

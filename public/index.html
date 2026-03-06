@@ -865,9 +865,22 @@ async function fetchCards() {
 }
 
 async function pushCard(card) {
-  // Store card JSON in list (no hype count inside the JSON — hypes live in the hash)
-  const { hypes, hyped, ...cardData } = card;
-  await redis('lpush', KEY_CARDS, JSON.stringify(cardData));
+  const body = {
+    name: card.anon ? 'Anonymous Runner' : card.name,
+    anon: card.anon,
+    goal: card.goal,
+    type: card.type,
+    pace: card.pace || '',
+    message: card.message || ''
+  };
+  const res = await fetch('/api/post', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || 'Could not save post.');
+  return json.card;
 }
 
 async function incrementHype(id, delta) {
@@ -1030,20 +1043,18 @@ async function addCard() {
 
   const isAnon = document.getElementById('inp-anon').checked;
   const displayName = isAnon ? 'Anonymous Runner' : name;
-  const card = { id: 'c' + Date.now(), name: displayName, anon: isAnon, goal, type, pace, message: msg, ts: Date.now() };
 
   setLoading(true);
   try {
-    await pushCard(card);
-    // Optimistic prepend
-    card.hypes = 0;
-    card.hyped = false;
-    cards.unshift(card);
+    const saved = await pushCard({ name, anon: isAnon, goal, type, pace, message: msg });
+    saved.hypes = 0;
+    saved.hyped = false;
+    cards.unshift(saved);
     ['inp-name','inp-goal','inp-pace','inp-msg'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('inp-type').selectedIndex = 0;
     render();
   } catch(e) {
-    renderError('Could not save to Redis. Check your Upstash credentials.');
+    renderError(e.message || 'Could not save post. Try again.');
     console.error(e);
   } finally {
     setLoading(false);
